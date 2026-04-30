@@ -38,6 +38,10 @@ Before implementing the `gr.State()` session memory, the bot would immediately f
 When I first built the `FULL_PACKAGE` intent, the bot executed three heavy LLM tasks (Classification, Tailoring, Cover Letter) simultaneously. This triggered a `429 RESOURCE_EXHAUSTED` crash from Google. I resolved this by adding a 15-second sleep timer to throttle the requests.
 ![API Limit Crash](timeout.png)
 
+**How it Looks When it's Functioning Properly**
+Below is what a successful prompt looks like when using the example prompt, "Find me an entry-level job IT audit job in Seattle.", pulls up:
+![Successful Prompt](success.png)
+
 *(Note: Successful interactions are logged dynamically in the `chat_logs.csv` file available for download in the live app interface).*
 
 ## How to Run
