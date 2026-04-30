@@ -28,15 +28,15 @@ Below are visual logs of the development process, showcasing how the bot handles
 
 **1. Handling Missing Context (Guardrails)**
 The bot is programmed to intercept tailoring requests if a master resume hasn't been uploaded yet, preventing the LLM from processing empty data.
-![Missing Resume Error](Screenshot%202026-04-29%20at%2011.54.57%20AM.png)
+![Missing Resume Error](noresume.png)
 
 **2. The Stateless Memory Limitation**
 Before implementing the `gr.State()` session memory, the bot would immediately forget the job description after searching. When asked to tailor a resume based on the "first job found," it failed to understand the context of the previous turn.
-![Memory Lapse Error](Screenshot%202026-04-29%20at%204.40.46%20PM.png)
+![Memory Lapse Error](nojobpng)
 
 **3. Hitting API Rate Limits**
 When I first built the `FULL_PACKAGE` intent, the bot executed three heavy LLM tasks (Classification, Tailoring, Cover Letter) simultaneously. This triggered a `429 RESOURCE_EXHAUSTED` crash from Google. I resolved this by adding a 15-second sleep timer to throttle the requests.
-![API Limit Crash](Screenshot%202026-04-29%20at%205.22.28%20PM.png)
+![API Limit Crash](timeout.png)
 
 *(Note: Successful interactions are logged dynamically in the `chat_logs.csv` file available for download in the live app interface).*
 
