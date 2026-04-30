@@ -32,7 +32,7 @@ The bot is programmed to intercept tailoring requests if a master resume hasn't 
 
 **2. The Stateless Memory Limitation**
 Before implementing the `gr.State()` session memory, the bot would immediately forget the job description after searching. When asked to tailor a resume based on the "first job found," it failed to understand the context of the previous turn.
-![Memory Lapse Error](nojobpng)
+![Memory Lapse Error](nojob.png)
 
 **3. Hitting API Rate Limits**
 When I first built the `FULL_PACKAGE` intent, the bot executed three heavy LLM tasks (Classification, Tailoring, Cover Letter) simultaneously. This triggered a `429 RESOURCE_EXHAUSTED` crash from Google. I resolved this by adding a 15-second sleep timer to throttle the requests.
