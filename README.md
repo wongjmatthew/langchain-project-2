@@ -24,7 +24,7 @@ Additionally, dealing with Gradio's stateless nature was challenging. Early iter
 
 ## Sample Conversations & Error Handling
 
-Below are visual logs of the development process, showcasing how the bot handles edge cases, memory lapses, and API limits.
+Below are visual logs of the development process, showcasing how the bot handles edge cases, memory lapses, API limits, as well as what appears when it works.
 
 **1. Handling Missing Context (Guardrails)**
 The bot is programmed to intercept tailoring requests if a master resume hasn't been uploaded yet, preventing the LLM from processing empty data.
@@ -38,7 +38,7 @@ Before implementing the `gr.State()` session memory, the bot would immediately f
 When I first built the `FULL_PACKAGE` intent, the bot executed three heavy LLM tasks (Classification, Tailoring, Cover Letter) simultaneously. This triggered a `429 RESOURCE_EXHAUSTED` crash from Google. I resolved this by adding a 15-second sleep timer to throttle the requests.
 ![API Limit Crash](timeout.png)
 
-**How it Looks When it's Functioning Properly**
+**4. Properly Functioning**
 Below is what a successful prompt looks like when using the example prompt, "Find me an entry-level job IT audit job in Seattle.", pulls up:
 ![Successful Prompt](success.png)
 
