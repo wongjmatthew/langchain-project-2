@@ -166,9 +166,21 @@ QUERY: [the search string if they are searching, or None]
 classifier_chain = classifier_prompt | llm
 
 def handle_user_request(message: str, history: list, resume_file, session_state: dict) -> str:
-    # Format history so the LLM can read the context
-    formatted_history = "\n".join([f"User: {turn[0]}\nBot: {turn[1][:100]}..." for turn in history[-2:]]) if history else "No history yet."
-    
+    # --- Robust history parsing for Gradio 6.0 dictionaries ---
+    formatted_history = ""
+    if history:
+        for item in history[-4:]: # Grabs last 2 turns
+            if isinstance(item, dict):
+                role = item.get("role", "User")
+                content = str(item.get("content", ""))[:100]
+                formatted_history += f"{role}: {content}...\n"
+            elif isinstance(item, (list, tuple)) and len(item) >= 2:
+                formatted_history += f"User: {str(item[0])[:100]}...\nBot: {str(item[1])[:100]}...\n"
+                
+    if not formatted_history.strip():
+        formatted_history = "No history yet."
+        
+    # 1. Classify and Extract Parameters
     result = classifier_chain.invoke({"message": message, "history": formatted_history})
     raw_content = result.content
     full_text = "".join([part.get("text", "") for part in raw_content if isinstance(part, dict)]) if isinstance(raw_content, list) else str(raw_content)
@@ -189,9 +201,12 @@ def handle_user_request(message: str, history: list, resume_file, session_state:
     if "FULL_PACKAGE" in category:
         job_data = search_google_jobs(query)
         if job_data["top_job_context"]:
-            session_state['last_job'] = job_data["top_job_context"] # Store in Memory
+            session_state['last_job'] = job_data["top_job_context"] 
             tailored = tailor_resume(job_data["top_job_context"], resume_text)
-            time.sleep(5) # Rate limit protection
+            
+            # API Rate Limit Protection (Wait 15 seconds)
+            time.sleep(15) 
+            
             cover_letter = write_cover_letter(job_data["top_job_context"], resume_text)
             response = job_data["readable"] + tailored + cover_letter
         else:
@@ -200,7 +215,7 @@ def handle_user_request(message: str, history: list, resume_file, session_state:
     elif "SEARCH_AND_TAILOR" in category:
         job_data = search_google_jobs(query)
         if job_data["top_job_context"]:
-            session_state['last_job'] = job_data["top_job_context"] # Store in Memory
+            session_state['last_job'] = job_data["top_job_context"] 
             tailored = tailor_resume(job_data["top_job_context"], resume_text)
             response = job_data["readable"] + tailored
         else:
@@ -209,11 +224,10 @@ def handle_user_request(message: str, history: list, resume_file, session_state:
     elif "SEARCH" in category:
         job_data = search_google_jobs(query)
         if job_data["top_job_context"]:
-            session_state['last_job'] = job_data["top_job_context"] # Store in Memory
+            session_state['last_job'] = job_data["top_job_context"] 
         response = job_data["readable"]
         
     elif "TAILOR" in category:
-        # Check if they pasted a long job description, otherwise use memory
         job_desc = message if len(message) > 100 else session_state.get('last_job')
         response = tailor_resume(job_desc, resume_text)
         
@@ -264,9 +278,10 @@ with gr.Blocks() as demo:
         with gr.Column(scale=3):
             chatbot = gr.ChatInterface(
                 fn=handle_user_request,
-                additional_inputs=[resume_upload, session_state], # Passes state into the function
+                additional_inputs=[resume_upload, session_state], 
                 examples=[
                     ["Find me an entry-level IT Audit job in Seattle.", None], 
+                    ["Give me the full package (find a job, tailor resume, write cover letter).", None]
                 ],
                 cache_examples=False
             )
